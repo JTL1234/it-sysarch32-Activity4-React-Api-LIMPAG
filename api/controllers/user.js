@@ -89,7 +89,7 @@ exports.user_login = (req, res, next) => {
 };
 
 exports.user_delete = (req, res, next) => {
-  User.remove({ _id: req.params.userId })
+  User.deleteOne({ _id: req.params.userId })
     .exec()
     .then(result => {
       res.status(200).json({
@@ -103,3 +103,4 @@ exports.user_delete = (req, res, next) => {
       });
     });
 };
+

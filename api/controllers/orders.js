@@ -18,7 +18,7 @@ exports.orders_get_all = (req, res, next) => {
             quantity: doc.quantity,
             request: {
               type: "GET",
-              url: "http://localhost:3000/orders/" + doc._id
+              url: "http://localhost:2000/orders/" + doc._id
             }
           };
         })
@@ -40,7 +40,7 @@ exports.orders_create_order = (req, res, next) => {
         });
       }
       const order = new Order({
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(), 
         quantity: req.body.quantity,
         product: req.body.productId
       });
@@ -57,7 +57,7 @@ exports.orders_create_order = (req, res, next) => {
         },
         request: {
           type: "GET",
-          url: "http://localhost:3000/orders/" + result._id
+          url: "http://localhost:2000/orders/" + result._id
         }
       });
     })
@@ -68,6 +68,7 @@ exports.orders_create_order = (req, res, next) => {
       });
     });
 };
+
 
 exports.orders_get_order = (req, res, next) => {
   Order.findById(req.params.orderId)
@@ -83,7 +84,7 @@ exports.orders_get_order = (req, res, next) => {
         order: order,
         request: {
           type: "GET",
-          url: "http://localhost:3000/orders"
+          url: "http://localhost:2000/orders"
         }
       });
     })
@@ -95,14 +96,14 @@ exports.orders_get_order = (req, res, next) => {
 };
 
 exports.orders_delete_order = (req, res, next) => {
-  Order.remove({ _id: req.params.orderId })
+  Order.deleteOne({ _id: req.params.orderId })
     .exec()
     .then(result => {
       res.status(200).json({
         message: "Order deleted",
         request: {
           type: "POST",
-          url: "http://localhost:3000/orders",
+          url: "http://localhost:2000/orders",
           body: { productId: "ID", quantity: "Number" }
         }
       });
@@ -113,3 +114,4 @@ exports.orders_delete_order = (req, res, next) => {
       });
     });
 };
+

@@ -17,18 +17,12 @@ exports.products_get_all = (req, res, next) => {
             _id: doc._id,
             request: {
               type: "GET",
-              url: "http://localhost:3000/products/" + doc._id
+              url: "http://localhost:2000/products/" + doc._id
             }
           };
         })
       };
-      //   if (docs.length >= 0) {
       res.status(200).json(response);
-      //   } else {
-      //       res.status(404).json({
-      //           message: 'No entries found'
-      //       });
-      //   }
     })
     .catch(err => {
       console.log(err);
@@ -59,7 +53,7 @@ exports.products_create_product = (req, res, next) => {
           _id: result._id,
           request: {
             type: "GET",
-            url: "http://localhost:3000/products/" + result._id
+            url: "http://localhost:2000/products/" + result._id
           }
         }
       });
@@ -75,7 +69,7 @@ exports.products_create_product = (req, res, next) => {
 exports.products_get_product = (req, res, next) => {
   const id = req.params.productId;
   Product.findById(id)
-    .select("name price _id productImage")
+    .select("name price description _id productImage")
     .exec()
     .then(doc => {
       console.log("From database", doc);
@@ -84,7 +78,7 @@ exports.products_get_product = (req, res, next) => {
           product: doc,
           request: {
             type: "GET",
-            url: "http://localhost:3000/products"
+            url: "http://localhost:2000/products"
           }
         });
       } else {
@@ -102,17 +96,25 @@ exports.products_get_product = (req, res, next) => {
 exports.products_update_product = (req, res, next) => {
   const id = req.params.productId;
   const updateOps = {};
-  for (const ops of req.body) {
-    updateOps[ops.propName] = ops.value;
+
+  // Check if req.body is an array
+  if (!Array.isArray(req.body)) {
+    return res.status(400).json({ error: "Request body must be an array of objects" });
   }
-  Product.update({ _id: id }, { $set: updateOps })
+
+  // Iterate over each object in the array and construct the update operation
+  req.body.forEach(update => {
+    updateOps[update.propName] = update.value;
+  });
+
+  Product.updateOne({ _id: id }, { $set: updateOps })
     .exec()
     .then(result => {
       res.status(200).json({
         message: "Product updated",
         request: {
           type: "GET",
-          url: "http://localhost:3000/products/" + id
+          url: "http://localhost:2000/products/" + id
         }
       });
     })
@@ -124,16 +126,17 @@ exports.products_update_product = (req, res, next) => {
     });
 };
 
+
 exports.products_delete = (req, res, next) => {
   const id = req.params.productId;
-  Product.remove({ _id: id })
+  Product.deleteOne({ _id: id })
     .exec()
     .then(result => {
       res.status(200).json({
         message: "Product deleted",
         request: {
           type: "POST",
-          url: "http://localhost:3000/products",
+          url: "http://localhost:2000/products",
           body: { name: "String", price: "Number" }
         }
       });
